@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="pt-BR"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aventura dos Pequenos – Pré-Escola II</title>
+<style>
+:root{--ceu:#cfeefa;--sol:#ffc93c;--mar:#1f6f8b;--fol:#3aa655;--cor:#ff6f59;--tx:#1d3557}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:"Trebuchet MS","Segoe UI",Verdana,sans-serif;color:var(--tx);background:linear-gradient(var(--ceu) 0 70%,#bfe8a8 70%);display:flex;justify-content:center;overflow-x:hidden}
+#app{width:100%;max-width:980px;padding:12px 16px;display:flex;flex-direction:column;min-height:100%}
+h1{font-size:clamp(30px,6vw,52px);margin:8px 0;text-align:center;line-height:1.1}
+.scr{display:none;flex-direction:column;align-items:center;gap:14px;flex:1}
+.scr.on{display:flex}
+.card{background:#fff;border:4px solid var(--tx);border-radius:28px;padding:16px 20px;text-align:center}
+input{font:inherit;font-size:28px;padding:12px 18px;border:4px solid var(--tx);border-radius:20px;width:min(100%,420px);text-align:center}
+.big{font:inherit;font-size:clamp(24px,5vw,36px);font-weight:700;color:var(--tx);background:var(--sol);border:4px solid var(--tx);border-radius:28px;padding:16px 28px;min-width:260px;cursor:pointer;box-shadow:0 6px 0 var(--tx);transition:transform .1s}
+.big:active{transform:translateY(4px);box-shadow:0 2px 0 var(--tx)}
+.big.f{background:#9be37f}.big.m{background:#ffd23c}.big.d{background:#ff9a76}
+.lnk{background:none;border:0;font:inherit;font-size:16px;color:var(--mar);text-decoration:underline;cursor:pointer;margin-top:auto;padding:12px}
+#top{display:flex;align-items:center;gap:10px;width:100%}
+#st{flex:1;font-size:clamp(11px,2.2vw,18px);letter-spacing:1px;word-break:break-all}
+#area{font-size:14px;opacity:.75;width:100%;text-align:center}
+#say{font-size:34px;width:64px;height:64px;border-radius:50%;border:4px solid var(--tx);background:#fff;cursor:pointer}
+#bub{display:flex;align-items:center;gap:10px;font-size:clamp(20px,4vw,28px);font-weight:700;min-height:64px}
+#bub .mas{font-size:56px}
+#stim{display:flex;justify-content:center;align-items:center;min-height:130px;font-size:100px}
+#opts{display:grid;grid-template-columns:repeat(2,1fr);gap:16px;width:100%;margin-top:auto;padding-bottom:12px}
+.opt{font:inherit;min-height:150px;font-size:42px;background:#fff;border:5px solid var(--tx);border-radius:30px;cursor:pointer;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;box-shadow:0 7px 0 var(--tx);color:var(--tx)}
+.opt:active{transform:translateY(4px)}
+.opt small{font-size:20px;font-weight:700}
+.opt.ok{background:#a8f0a0;animation:pulo .5s}
+.opt.no{background:#fff3cf;opacity:.55;animation:bal .4s}
+.opt.hint{animation:pulo .8s infinite;border-color:var(--fol)}
+.em{font-size:76px;line-height:1}
+b{font-size:64px;line-height:1}
+.wd{font-size:54px;letter-spacing:4px}
+.col,.grid{display:grid;gap:8px;justify-items:center}
+.grid{grid-template-columns:1fr 1fr;gap:6px 40px}
+.row{display:flex;align-items:center;gap:24px;flex-wrap:wrap;justify-content:center}
+.box{border:6px dashed var(--mar);border-radius:22px;padding:6px 14px;background:#fff8}
+.grp{display:flex;flex-wrap:wrap;justify-content:center;gap:2px;max-width:420px;font-size:46px;line-height:1.1}
+.opt .grp{font-size:32px;max-width:100%}
+.x{opacity:.25;filter:grayscale(1)}
+.sw{display:block;width:90px;height:90px;border-radius:50%;border:5px solid var(--tx)}
+.star{position:fixed;font-size:44px;pointer-events:none;animation:sobe 1.5s ease-out forwards;z-index:9}
+@keyframes sobe{from{transform:translateY(0) scale(.5);opacity:1}to{transform:translateY(-70vh) scale(1.5) rotate(200deg);opacity:0}}
+@keyframes pulo{50%{transform:scale(1.07)}}
+@keyframes bal{25%{transform:translateX(-8px)}75%{transform:translateX(8px)}}
+@media(max-width:560px){.opt{min-height:120px;font-size:32px}.em{font-size:58px}b{font-size:50px}#stim{font-size:76px}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important}}
+button:focus-visible,input:focus-visible{outline:5px solid var(--cor);outline-offset:3px}
+</style></head><body><div id="app">
+
+<section id="home" class="scr on">
+ <h1>🦉 Aventura dos Pequenos</h1>
+ <div class="card"><p style="font-size:24px;margin:0 0 10px">Qual é o seu nome?</p><input id="nome" maxlength="40" autocomplete="off" placeholder="Digite aqui"></div>
+ <p style="font-size:24px;margin:4px">Escolha sua aventura:</p>
+ <button class="big f" data-lv="0">🌱 Fácil</button>
+ <button class="big m" data-lv="1">🌼 Médio</button>
+ <button class="big d" data-lv="2">🌳 Difícil</button>
+ <button class="lnk" id="dl1">💾 Baixar registro das tentativas (professores)</button>
+</section>
+
+<section id="game" class="scr">
+ <div id="top"><button id="say" title="Ouvir de novo" aria-label="Ouvir de novo">🔊</button><div id="st"></div></div>
+ <div id="area"></div>
+ <div id="bub"><span class="mas">🦉</span><span id="bt"></span></div>
+ <div id="stim"></div>
+ <div id="opts"></div>
+</section>
+
+<section id="end" class="scr">
+ <h1>🎉 Parabéns, <span id="en"></span>!</h1>
+ <div class="card" style="font-size:34px"><div id="es" style="font-size:44px"></div><p id="em2" style="margin:8px 0 0"></p></div>
+ <button class="big" id="dl2">💾 Salvar registro</button>
+ <button class="big f" id="again">🏠 Jogar de novo</button>
+</section>
+</div>
+
+<script>
+const $=s=>document.querySelector(s),R=a=>a[Math.random()*a.length|0],sh=a=>a.map(x=>[Math.random(),x]).sort((p,q)=>p[0]-q[0]).map(p=>p[1]);
+const K=[2,3,4],base=s=>s.normalize("NFD").replace(/[\u0300-\u036f]/g,"");
+const SY="Sons e Sílabas",ES="Noções de Espaço",MA="Matemática Simples",PE="Percepção Visual e Sensorial";
+const Q=(a,s,h,say,stim,o)=>({a,s,h,say,stim,o:sh(o)});
+const sp=e=>`<span class=em>${e}</span>`;
+const N=(n,max,k)=>{let s=[n];while(s.length<k){let c=1+Math.random()*max|0;if(!s.includes(c))s.push(c)}return s.map(c=>["<b>"+c+"</b>",c==n])};
+
+/* ---------- Sons e Sílabas ---------- */
+const W=[["BOLA","⚽","BO-LA"],["CASA","🏠","CA-SA"],["GATO","🐱","GA-TO"],["PATO","🦆","PA-TO"],["LUA","🌙","LU-A"],["SAPO","🐸","SA-PO"],["FLOR","🌸","FLOR"],["SOL","☀️","SOL"],["PÃO","🍞","PÃO"],["UVA","🍇","U-VA"],["PEIXE","🐟","PEI-XE"],["CARRO","🚗","CAR-RO"],["VACA","🐄","VA-CA"],["BALÃO","🎈","BA-LÃO"],["MAÇÃ","🍎","MA-ÇÃ"],["BANANA","🍌","BA-NA-NA"],["MACACO","🐵","MA-CA-CO"],["SAPATO","👟","SA-PA-TO"],["MORANGO","🍓","MO-RAN-GO"],["GIRAFA","🦒","GI-RA-FA"],["CENOURA","🥕","CE-NOU-RA"],["ÁRVORE","🌳","ÁR-VO-RE"],["ABACAXI","🍍","A-BA-CA-XI"],["ELEFANTE","🐘","E-LE-FAN-TE"],["BORBOLETA","🦋","BOR-BO-LE-TA"],["BICICLETA","🚲","BI-CI-CLE-TA"],["TARTARUGA","🐢","TAR-TA-RU-GA"]];
+const ns=w=>w[2].split("-").length;
+const pool=lv=>W.filter(w=>lv==0?ns(w)<=2:lv==1?ns(w)>=2&&ns(w)<=3:ns(w)>=3);
+const pick=(lv,k)=>sh(pool(lv)).slice(0,k);
+const AL="ABCDEFGHIJLMNOPRSTUV";
+const letters=(L,k)=>{let s=[L];while(s.length<k){let c=AL[Math.random()*AL.length|0];if(!s.includes(c))s.push(c)}return s.map(c=>["<b>"+c+"</b>",c==L])};
+const gS={
+ hear:lv=>{let ws=pick(lv,K[lv]);return Q(SY,"Consciência fonológica","Identificar a palavra falada","Ouça com atenção. Qual figura é "+ws[0][0].toLowerCase()+"?","🔊",ws.map((w,i)=>[sp(w[1]),i==0]))},
+ syl:lv=>{let w=pick(lv,1)[0];return Q(SY,"Consciência silábica","Contar sílabas (pedaços da palavra)","Ouça: "+w[2].split("-").join(", ")+". Quantos pedaços tem essa palavra?",w[1],N(ns(w),4,K[lv]))},
+ first:lv=>{let w=pick(lv,1)[0];return Q(SY,"Letras e palavras","Reconhecer a letra inicial","Com qual letra começa "+w[0].toLowerCase()+"?",lv?`<b class=wd>${w[0]}</b>`:w[1],letters(base(w[0])[0],K[lv]))},
+ last:lv=>{let w=pick(lv,1)[0];return Q(SY,"Letras e palavras","Reconhecer a letra final","Com qual letra termina "+w[0].toLowerCase()+"?",`<b class=wd>${w[0]}</b>`,letters(base(w[0]).slice(-1),K[lv]))},
+ letters:lv=>{let w=pick(lv,1)[0];return Q(SY,"Letras e palavras","Contar letras de uma palavra","Quantas letras tem a palavra "+w[0].toLowerCase()+"?",`<b class=wd>${w[0]}</b>`,N(base(w[0]).length,10,K[lv]))},
+ hearT:lv=>{let ws=pick(lv,K[lv]);return Q(SY,"Letras e palavras","Reconhecer a palavra escrita","Ouça: "+ws[0][0].toLowerCase()+". Toque na palavra certa.","🔊",ws.map((w,i)=>[`<b class=wd style="font-size:34px">${w[0]}</b>`,i==0]))}
+};
+/* ---------- Noções de Espaço ---------- */
+const IT=["🐶","🐱","🐰","🐻","🍎","⚽","🚗","⭐","🌸","🐟","🦆","🐵"],it=n=>sh(IT).slice(0,n);
+const gE={
+ stack:()=>{let[a,b]=it(2),t=Math.random()<.5;return Q(ES,"Em cima / embaixo","Localizar objetos no espaço","Qual está "+(t?"em cima":"embaixo")+"?",`<div class=col>${sp(a)}${sp(b)}</div>`,[[sp(a),t],[sp(b),!t]])},
+ side:()=>{let[a,b]=it(2),t=Math.random()<.5;return Q(ES,"Direita / esquerda","Localizar objetos no espaço","Qual está "+(t?"à esquerda":"à direita")+"?",`<div class=row>${sp(a)}${sp(b)}</div>`,[[sp(a),t],[sp(b),!t]])},
+ inside:()=>{let[a,b]=it(2),t=Math.random()<.5;return Q(ES,"Dentro / fora","Localizar objetos no espaço","Qual está "+(t?"dentro":"fora")+" da caixa?",`<div class=row><div class=box>${sp(a)}</div>${sp(b)}</div>`,[[sp(a),t],[sp(b),!t]])},
+ row3:()=>{let x=it(3),p=Math.random()*3|0;return Q(ES,"Posição na fila","Localizar objetos no espaço","Qual está "+["à esquerda","no meio","à direita"][p]+"?",`<div class=row>${x.map(sp).join("")}</div>`,x.map((e,i)=>[sp(e),i==p]))},
+ grid:()=>{let x=it(4),p=Math.random()*4|0;return Q(ES,"Posição na grade","Localizar objetos no espaço","Qual está "+["em cima, à esquerda","em cima, à direita","embaixo, à esquerda","embaixo, à direita"][p]+"?",`<div class=grid>${x.map(sp).join("")}</div>`,x.map((e,i)=>[sp(e),i==p]))}
+};
+/* ---------- Matemática Simples ---------- */
+const AN=["🐶","🐱","🐰","🐻","🍎","⚽","⭐","🐟","🚗"],g=(e,n)=>`<div class=grp>${e.repeat(n)}</div>`;
+const gM={
+ count:(lv,m)=>{m=+m;let n=1+Math.random()*m|0,e=R(AN);return Q(MA,"Contagem e quantidades","Contar objetos","Conte. Quantos tem na tela?",g(e,n),N(n,m,K[lv]))},
+ size:(lv,p)=>{let[n,kind]=p.split("-"),e=R(AN),S=n==2?[50,100]:[44,76,108],t=kind=="maior"?S.length-1:kind=="menor"?0:1;return Q(MA,"Grandezas e comparações","Comparar tamanhos","Qual é o "+kind+"?","📏",S.map((s,i)=>[`<span style="font-size:${s}px;line-height:1">${e}</span>`,i==t]))},
+ more:(lv)=>{let m=lv?8:4,a=1+Math.random()*m|0,b;do b=1+Math.random()*m|0;while(b==a);let[e,f]=it(2),mais=Math.random()<.5,ok=mais?a>b:a<b;return Q(MA,"Grandezas e comparações","Comparar quantidades","Onde tem "+(mais?"mais":"menos")+"?","⚖️",[[g(e,a),ok],[g(f,b),!ok]])},
+ add:()=>{let a=1+Math.random()*4|0,b=1+Math.random()*4|0,e=R(AN);return Q(MA,"Contagem e quantidades","Juntar quantidades","Tem "+a+" e chegam mais "+b+". Quantos tem agora?",`<div class=row>${g(e,a)}<b>+</b>${g(e,b)}</div>`,N(a+b,10,4))},
+ sub:()=>{let a=3+Math.random()*5|0,b=1+Math.random()*(a-1)|0,e=R(AN);return Q(MA,"Contagem e quantidades","Tirar quantidades","Eram "+a+". Saíram "+b+". Quantos ficaram?",`<div class=grp>${e.repeat(a-b)}<span class=x>${e.repeat(b)}</span></div>`,N(a-b,8,4))}
+};
+/* ---------- Percepção Visual e Sensorial ---------- */
+const C=[["vermelho","#e53935"],["azul","#1e88e5"],["amarelo","#fdd835"],["verde","#43a047"],["laranja","#fb8c00"],["roxo","#8e24aa"],["rosa","#f06292"],["marrom","#6d4c41"],["cinza","#9e9e9e"],["preto","#212121"]];
+const H=[["🌊","Mar"],["🌳","Floresta"],["🏜️","Deserto"],["❄️","Gelo"],["🌾","Fazenda"]];
+const A=[["🐟","o peixe",0],["🐋","a baleia",0],["🐒","o macaco",1],["🦜","o papagaio",1],["🐪","o camelo",2],["🐧","o pinguim",3],["🐄","a vaca",4],["🐖","o porco",4]];
+const GR=[["🍎","🍌","🍇","🍓","🍍"],["🐶","🐱","🐰","🐻","🐵"],["🚗","🚲","🚌","✈️","🚢"]];
+const LI=[["O peixe nada no mar.","Quem nada no mar?","🐟"],["O passarinho voa no céu.","Quem voa no céu?","🐦"],["A vaca dá leite.","Quem dá leite?","🐄"],["O macaco come banana.","Quem come banana?","🐵"],["O cachorro faz au au.","Quem faz au au?","🐶"],["O gato faz miau.","Quem faz miau?","🐱"],["O sapo pula na lagoa.","Quem pula na lagoa?","🐸"]];
+const gP={
+ color:lv=>{let p=C.slice(0,[4,7,10][lv]),c=R(p),o=sh(p.filter(x=>x!=c)).slice(0,K[lv]-1).concat([c]);return Q(PE,"Cores","Reconhecer cores","Toque na cor "+c[0]+".","🎨",o.map(x=>[`<i class=sw style="background:${x[1]}"></i>`,x==c]))},
+ hab:lv=>{let a=R(A.filter(x=>lv||x[2]<3)),hs=H.slice(0,lv?5:3),o=sh(hs.filter((h,i)=>i!=a[2])).slice(0,K[lv]-1).concat([H[a[2]]]);return Q(PE,"Animais e seus habitats","Relacionar animal ao ambiente","Onde vive "+a[1]+"?",a[0],o.map(h=>[sp(h[0])+"<small>"+h[1]+"</small>",h==H[a[2]]]))},
+ odd:lv=>{let[g1,g2]=sh(GR),n=K[lv],o=sh(g1).slice(0,n-1).map(e=>[sp(e),false]).concat([[sp(R(g2)),true]]);return Q(PE,"Percepção visual","Identificar o elemento diferente","Qual é diferente dos outros?","🔍",o)},
+ listen:lv=>{let l=R(LI),o=sh(LI.filter(x=>x!=l)).slice(0,K[lv]-1).map(x=>x[2]).filter((e,i,a)=>e!=l[2]&&a.indexOf(e)==i);while(o.length<K[lv]-1)o.push("🐷");return Q(PE,"Compreensão auditiva","Compreender o que ouviu","Ouça com atenção: "+l[0]+" "+l[1],"👂",o.map(e=>[sp(e),false]).concat([[sp(l[2]),true]]))}
+};
+const SETS={
+ S:[["hear","hear","syl","first","first"],["hear","syl","first","letters","syl"],["syl","first","letters","last","hearT"]],
+ E:[["stack","stack","side","side","inside"],["stack","side","inside","row3","row3"],["row3","grid","grid","inside","grid"]],
+ M:[["count:5","count:5","size:2-maior","size:2-menor","more"],["count:10","count:10","size:3-maior","more","more"],["add","add","sub","size:3-médio","sub"]],
+ P:[["color","color","hab","hab","odd"],["color","hab","odd","listen","listen"],["color","hab","odd","listen","listen"]]};
+const GEN={S:gS,E:gE,M:gM,P:gP};
+const build=lv=>["S","E","M","P"].flatMap(a=>SETS[a][lv].map(s=>{let[n,p]=s.split(":");return GEN[a][n](lv,p)}));
+
+/* ---------- Registro (.txt) ---------- */
+const LS={g:k=>{try{return localStorage.getItem(k)}catch(e){return null}},s:(k,v)=>{try{localStorage.setItem(k,v)}catch(e){}}};
+let LOG=LS.g("log")||"",CID=+LS.g("cid")||0;
+const HEAD="ID;Nome;Data;Hora;Nivel;Area;Assunto;Habilidade;Pergunta;Tentativa;Resultado\n";
+function reg(res){const d=new Date(),p=n=>String(n).padStart(2,"0");CID++;LS.s("cid",CID);
+ LOG+=[CID,nome,`${p(d.getDate())}/${p(d.getMonth()+1)}/${d.getFullYear()}`,`${p(d.getHours())}:${p(d.getMinutes())}:${p(d.getSeconds())}`,["Fácil","Médio","Difícil"][lv],Q0.a,Q0.s,Q0.h,i+1,tent,res].join(";")+"\n";LS.s("log",LOG)}
+function baixar(){const a=document.createElement("a");a.href=URL.createObjectURL(new Blob(["\ufeff"+HEAD+LOG],{type:"text/plain;charset=utf-8"}));a.download="registro_tentativas.txt";document.body.appendChild(a);a.click();a.remove()}
+
+/* ---------- Som e voz ---------- */
+let AC;const tone=(fs,d=.15)=>{try{AC=AC||new(window.AudioContext||webkitAudioContext)();fs.forEach((f,j)=>{const o=AC.createOscillator(),g=AC.createGain(),t=AC.currentTime+j*d;o.frequency.value=f;o.connect(g);g.connect(AC.destination);g.gain.setValueAtTime(.2,t);g.gain.exponentialRampToValueAtTime(.001,t+d);o.start(t);o.stop(t+d)})}catch(e){}};
+function say(t){try{speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang="pt-BR";u.rate=.85;speechSynthesis.speak(u)}catch(e){}}
+const bub=t=>$("#bt").textContent=t;
+function boom(){for(let k=0;k<14;k++){const s=document.createElement("span");s.className="star";s.textContent=R(["⭐","🌟","✨"]);s.style.left=Math.random()*90+"vw";s.style.bottom=Math.random()*30+"vh";document.body.appendChild(s);setTimeout(()=>s.remove(),1600)}}
+
+/* ---------- Fluxo ---------- */
+let nome,lv,QS,i,tent,pts,lock,Q0;
+const go=id=>{document.querySelectorAll(".scr").forEach(s=>s.classList.toggle("on",s.id==id));window.scrollTo(0,0)};
+function start(l){nome=$("#nome").value.trim()||"Amiguinho";lv=l;QS=build(l);i=0;pts=0;lock=0;go("game");show()}
+function show(){Q0=QS[i];tent=0;
+ $("#st").textContent=QS.map((_,j)=>j<i?"⭐":"☆").join("");
+ $("#area").textContent=Q0.a;
+ $("#stim").innerHTML=Q0.stim;
+ const box=$("#opts");box.innerHTML="";
+ Q0.o.forEach(([h,ok])=>{const b=document.createElement("button");b.className="opt";b.innerHTML=h;b.dataset.ok=ok?"1":"0";b.onclick=()=>ans(b,ok);box.appendChild(b)});
+ bub("Vamos lá, "+nome+"!");say(Q0.say)}
+function ans(b,ok){if(lock)return;tent++;reg(ok?"ACERTO":"ERRO");
+ if(ok){lock=1;b.classList.add("ok");tone([523,659,784,1047]);const p=R(["Muito bem!","Parabéns!","Isso mesmo!","Você acertou!"]);bub("🎉 "+p);say(p);if(tent==1)pts++;boom();setTimeout(()=>{lock=0;++i<QS.length?show():fim()},1800)}
+ else{b.classList.add("no");b.disabled=true;tone([330,294],.2);const p="Quase! Vamos tentar de novo?";bub("💛 "+p);say(p);
+  if(tent>=2)[...$("#opts").children].find(x=>x.dataset.ok=="1").classList.add("hint")}}
+function fim(){$("#en").textContent=nome;$("#es").textContent="⭐".repeat(Math.max(1,Math.round(pts/QS.length*5)));$("#em2").textContent="Você concluiu o nível "+["Fácil","Médio","Difícil"][lv]+"!";tone([523,659,784,1047,1319],.18);boom();say("Parabéns "+nome+"! Você terminou!");go("end")}
+document.querySelectorAll("[data-lv]").forEach(b=>b.onclick=()=>start(+b.dataset.lv));
+$("#say").onclick=()=>say(Q0.say);
+$("#dl1").onclick=$("#dl2").onclick=baixar;
+$("#again").onclick=()=>go("home");
+</script></body></html>
